@@ -31,13 +31,13 @@ Python + FastAPI, TypeScript, PostgresQl
 
 ## **Макет:**
 
-![CleanShot 2025-09-08 at 18.52.51.png](%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%20%D0%BF%D0%BE%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%2026894fb1369d80668d37f8e32b7263aa/CleanShot_2025-09-08_at_18.52.51.png)
+![CleanShot 2025-09-08 at 18.52.51.png](imgs/CleanShot_2025-09-08_at_18.52.51.png)
 
-![CleanShot 2025-09-08 at 18.53.40.png](%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%20%D0%BF%D0%BE%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%2026894fb1369d80668d37f8e32b7263aa/CleanShot_2025-09-08_at_18.53.40.png)
+![CleanShot 2025-09-08 at 18.53.40.png](imgs/CleanShot_2025-09-08_at_18.53.40.png)
 
-![CleanShot 2025-09-08 at 18.53.08.png](%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%20%D0%BF%D0%BE%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%2026894fb1369d80668d37f8e32b7263aa/CleanShot_2025-09-08_at_18.53.08.png)
+![CleanShot 2025-09-08 at 18.53.08.png](imgs/CleanShot_2025-09-08_at_18.53.08.png)
 
-![CleanShot 2025-09-08 at 18.53.18.png](%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%20%D0%BF%D0%BE%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%2026894fb1369d80668d37f8e32b7263aa/CleanShot_2025-09-08_at_18.53.18.png)
+![CleanShot 2025-09-08 at 18.53.18.png](imgs/CleanShot_2025-09-08_at_18.53.18.png)
 
 ## Юзер стори
 
@@ -54,49 +54,40 @@ Python + FastAPI, TypeScript, PostgresQl
 ### Оценка NFR для проекта Crypto Tracker
 
 ### throughput (RW QPS)
-
 - ~10 RPS в пике (80% чтения, 20% записи)
 
 ### latency (RW)
-
 - p95 < 200 мс для API
 - уведомления в Telegram до 5 сек
 
 ### R/W ratio
-
 - ~80% чтения, 20% записи
 
 ### traffic volume (RW)
-
 - ~1–2 GB/день
 
 ### storage: disk, RAM
-
 - **Postgres**: ~10 MB / 10k пользователей (данные портфелей)
 - **История цен**: до 1 GB/месяц
 - **RAM**: 2–4 GB
 
 ### latency & throughput
-
 - FastAPI + Postgres обеспечивают нужные показатели
 
 ### CAP
-
 - **Consistency**: strong (портфель), eventual (цены)
 - **Availability**: репликация + failover
 
 ### performance vs scalability
-
 - 1 сервер (4 vCPU, 8 GB RAM) для 10k пользователей
 - при росте: горизонтальное масштабирование + Redis
 
 ### costs
-
 - ~2000 руб/мес. (сервер)
 
 ## Архитектура и проектировани
 
-![telegram-cloud-photo-size-2-5402271077238964040-y.jpg](%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%20%D0%BF%D0%BE%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%2026894fb1369d80668d37f8e32b7263aa/telegram-cloud-photo-size-2-5402271077238964040-y.jpg)
+![telegram-cloud-photo-size-2-5402271077238964040-y.jpg](imgs/telegram-cloud-photo-size-2-5402271077238964040-y.jpg)
 
 ### Auth / Пользователи
 

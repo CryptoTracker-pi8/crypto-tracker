@@ -1,0 +1,790 @@
+openapi: 3.1.0
+info:
+  title: Crypto App API
+  version: "1.0.0"
+  description: |
+    REST API для веб-приложения и Telegram-бота:
+    популярные валюты, графики, «Избранное»,
+    сценарии уведомлений.
+  contact:
+    name: API Support
+    email: devnull@example.com
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://api.example.com/api/v1
+    description: Production
+  - url: https://staging-api.example.com/api/v1
+    description: Staging
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Profile
+  - name: Market
+  - name: Favorites
+  - name: Portfolios
+  - name: Alerts
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthRegisterRequest' }
+      responses:
+        '201':
+          description: Зарегистрирован
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Логин
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthLoginRequest' }
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновление токена
+      responses:
+        '200':
+          description: Новый токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход
+      responses:
+        '204': { description: Вышел }
+
+  /me:
+    get:
+      tags: [Profile]
+      summary: Профиль пользователя
+      responses:
+        '200':
+          description: Профиль
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /coins/search:
+    get:
+      tags: [Market]
+      summary: Поиск монет
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Строка поиска
+          schema: { type: string }
+      responses:
+        '200':
+          description: Совпадения
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CoinLight' }
+
+  /coins/{symbol}:
+    get:
+      tags: [Market]
+      summary: Карточка монеты
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Монета
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Coin' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /market/tickers:
+    get:
+      tags: [Market]
+      summary: Текущие котировки нескольких монет
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: CSV списка символов, напр. BTC,ETH,SOL
+          schema: { type: string }
+      responses:
+        '200':
+          description: Котировки
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ticker' }
+
+
+
+
+  /me/favorites:
+    get:
+      tags: [Favorites]
+      summary: Получить «Избранное»
+      responses:
+        '200':
+          description: Символы
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+    post:
+      tags: [Favorites]
+      summary: Добавить в «Избранное»
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [symbol]
+              properties:
+                symbol: { type: string }
+      responses:
+        '201': { description: Добавлено }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /me/favorites/{symbol}:
+    delete:
+      tags: [Favorites]
+      summary: Удалить из «Избранного»
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '204': { description: Удалено }
+
+  /portfolios:
+    get:
+      tags: [Portfolios]
+      summary: Список портфелей
+      responses:
+        '200':
+          description: Портфели
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Portfolio' }
+    post:
+      tags: [Portfolios]
+      summary: Создать портфель
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PortfolioCreate' }
+      responses:
+        '201':
+          description: Создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Portfolio' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /portfolios/{id}:
+    get:
+      tags: [Portfolios]
+      summary: Получить портфель
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+      responses:
+        '200':
+          description: Портфель
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Portfolio' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Portfolios]
+      summary: Обновить портфель
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PortfolioUpdate' }
+      responses:
+        '200':
+          description: Обновлён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Portfolio' }
+    delete:
+      tags: [Portfolios]
+      summary: Удалить портфель
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+      responses:
+        '204': { description: Удалён }
+
+  /portfolios/{id}/lots:
+    post:
+      tags: [Portfolios]
+      summary: Добавить лот (сделку)
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LotCreate' }
+      responses:
+        '201':
+          description: Создан лот
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lot' }
+    get:
+      tags: [Portfolios]
+      summary: Список лотов
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+      responses:
+        '200':
+          description: Лоты
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Lot' }
+
+  /portfolios/{id}/lots/{lotId}:
+    patch:
+      tags: [Portfolios]
+      summary: Обновить лот
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/LotId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LotUpdate' }
+      responses:
+        '200':
+          description: Обновлено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lot' }
+    delete:
+      tags: [Portfolios]
+      summary: Удалить лот
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/LotId'
+      responses:
+        '204': { description: Удалён }
+
+  /portfolios/{id}/holdings:
+    get:
+      tags: [Portfolios]
+      summary: Текущие позиции (агрегировано)
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+      responses:
+        '200':
+          description: Позиции
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Holding' }
+
+  /portfolios/{id}/summary:
+    get:
+      tags: [Portfolios]
+      summary: Сводка портфеля
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/Window'
+      responses:
+        '200':
+          description: Сводка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PortfolioSummary' }
+
+
+  /portfolios/{id}/performance:
+    get:
+      tags: [Portfolios]
+      summary: Нормализованная доходность (для сравнений)
+      parameters:
+        - $ref: '#/components/parameters/PortfolioId'
+        - $ref: '#/components/parameters/OHLCInterval'
+        - $ref: '#/components/parameters/Range'
+      responses:
+        '200':
+          description: Ряд доходности
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PerfPoint' }
+
+
+  /alerts:
+    get:
+      tags: [Alerts]
+      summary: Список алертов
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active,paused]
+      responses:
+        '200':
+          description: Алерты
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Alert' }
+    post:
+      tags: [Alerts]
+      summary: Создать алерт
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlertCreate' }
+      responses:
+        '201':
+          description: Создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Alert' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /alerts/{id}:
+    patch:
+      tags: [Alerts]
+      summary: Обновить алерт
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlertUpdate' }
+      responses:
+        '200':
+          description: Обновлён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Alert' }
+    delete:
+      tags: [Alerts]
+      summary: Удалить алерт
+      parameters:
+        - $ref: '#/components/parameters/AlertId'
+      responses:
+        '204': { description: Удалён }
+
+
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, maxLength: 64 }
+      description: Ключ идемпотентности для безопасных повторов
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Symbol:
+      name: symbol
+      in: path
+      required: true
+      schema: { type: string, example: BTC }
+    OHLCInterval:
+      name: interval
+      in: query
+      schema:
+        type: string
+        enum: [1m,5m,15m,1h,4h,1d]
+        default: 1h
+    Range:
+      name: range
+      in: query
+      schema:
+        type: string
+        enum: [1d,7d,1m,3m,1y,max]
+        default: 7d
+    Window:
+      name: window
+      in: query
+      schema:
+        type: string
+        enum: [5m,15m,1h,24h,7d]
+        default: 24h
+    PortfolioId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, example: pf_123 }
+    LotId:
+      name: lotId
+      in: path
+      required: true
+      schema: { type: string, example: lot_456 }
+    AlertId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, example: al_789 }
+
+  responses:
+    NotFound:
+      description: Не найдено
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthorized:
+      description: Неавторизован
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        created_at: { type: string, format: date-time }
+
+    UserSettings:
+      type: object
+      properties:
+        base_currency:
+          type: string
+          default: USD
+
+    UserSettingsUpdate:
+      allOf:
+        - $ref: '#/components/schemas/UserSettings'
+
+    AuthRegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user: { $ref: '#/components/schemas/User' }
+
+    CoinLight:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+
+    Sparkline:
+      type: object
+      properties:
+        interval: { type: string, example: '5m' }
+        points:
+          type: array
+          items: { type: number }
+
+    CoinPopular:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        price: { type: number }
+        change_24h_pct: { type: number }
+        market_cap: { type: number }
+        sparkline: { $ref: '#/components/schemas/Sparkline' }
+
+    Ticker:
+      type: object
+      properties:
+        symbol: { type: string }
+        price: { type: number }
+        change_24h_pct: { type: number }
+        updated_at: { type: string, format: date-time }
+
+    Coin:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        price: { type: number }
+        change_24h_pct: { type: number }
+        market_cap: { type: number }
+        circulating_supply: { type: number }
+        max_supply: { type: number, nullable: true }
+        updated_at: { type: string, format: date-time }
+
+    Portfolio:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        base_currency: { type: string, default: USD }
+        cost_method:
+          type: string
+          enum: [FIFO, AVG, LIFO]
+          default: FIFO
+        created_at: { type: string, format: date-time }
+
+    PortfolioCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        base_currency: { type: string, default: USD }
+        cost_method:
+          type: string
+          enum: [FIFO, AVG, LIFO]
+          default: FIFO
+
+    PortfolioUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        base_currency: { type: string }
+        cost_method:
+          type: string
+          enum: [FIFO, AVG, LIFO]
+
+    Lot:
+      type: object
+      properties:
+        id: { type: string, example: lot_456 }
+        symbol: { type: string }
+        quantity: { type: number }
+        price: { type: number, description: 'Цена покупки в base_currency' }
+        fee: { type: number, default: 0 }
+        executed_at: { type: string, format: date-time }
+        note: { type: string, nullable: true }
+
+    LotCreate:
+      type: object
+      required: [symbol, quantity, price, executed_at]
+      properties:
+        symbol: { type: string }
+        quantity: { type: number }
+        price: { type: number }
+        fee: { type: number, default: 0 }
+        executed_at: { type: string, format: date-time }
+        note: { type: string, nullable: true }
+
+    LotUpdate:
+      type: object
+      properties:
+        quantity: { type: number }
+        price: { type: number }
+        fee: { type: number }
+        executed_at: { type: string, format: date-time }
+        note: { type: string, nullable: true }
+
+    Holding:
+      type: object
+      properties:
+        symbol: { type: string }
+        quantity: { type: number }
+        avg_cost: { type: number }
+        current_price: { type: number }
+        market_value: { type: number }
+        unrealized_pnl_abs: { type: number }
+        unrealized_pnl_pct: { type: number }
+
+    PortfolioSummary:
+      type: object
+      properties:
+        as_of: { type: string, format: date-time }
+        total_cost: { type: number }
+        current_value: { type: number }
+        unrealized_pnl_abs: { type: number }
+        unrealized_pnl_pct: { type: number }
+        change_window_pct: { type: number }
+        best_asset:
+          type: object
+          properties:
+            symbol: { type: string }
+            pnl_pct: { type: number }
+        worst_asset:
+          type: object
+          properties:
+            symbol: { type: string }
+            pnl_pct: { type: number }
+
+    PerfPoint:
+      type: object
+      properties:
+        t: { type: string, format: date-time }
+        norm_return: { type: number }
+
+
+    Alert:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        scope: { type: string, enum: [coin, portfolio] }
+        symbol: { type: string, nullable: true }
+        portfolio_id: { type: string, nullable: true }
+        type:
+          type: string
+          enum: [price_change_pct, price_threshold, drawdown_pct]
+        direction:
+          type: string
+          enum: [up, down, both]
+        window:
+          type: string
+          enum: [5m,15m,1h,24h,7d]
+          nullable: true
+        threshold: { type: number }
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [telegram, app, email]
+        status:
+          type: string
+          enum: [active, paused]
+        created_at: { type: string, format: date-time }
+
+    AlertCreate:
+      type: object
+      required: [scope, type, threshold, channels]
+      properties:
+        name: { type: string }
+        scope: { type: string, enum: [coin, portfolio] }
+        symbol: { type: string, nullable: true }
+        portfolio_id: { type: string, nullable: true }
+        type:
+          type: string
+          enum: [price_change_pct, price_threshold, drawdown_pct]
+        direction:
+          type: string
+          enum: [up, down, both]
+          default: both
+        window:
+          type: string
+          enum: [5m,15m,1h,24h,7d]
+          nullable: true
+        threshold: { type: number, description: 'Напр. 0.5 = 0.5%' }
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [telegram, app, email]
+
+    AlertUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        direction:
+          type: string
+          enum: [up, down, both]
+        window:
+          type: string
+          enum: [5m,15m,1h,24h,7d]
+        threshold: { type: number }
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [telegram, app, email]
+        status:
+          type: string
+          enum: [active, paused]
+
+    AlertScenarioApplyRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [investor, trader]
+        symbols:
+          type: array
+          items: { type: string }
+          description: Ограничить на набор монет; если пусто — применить к избранным

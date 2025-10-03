@@ -23,6 +23,43 @@
 
 **Ссылка на репозиторий:** https://github.com/CryptoTracker-pi8/crypto-tracker
 
+## Оценка NFR
+
+### throughput (RW QPS)
+- ~10 RPS в пике (80% чтения, 20% записи)
+
+### latency (RW)
+- p95 < 200 мс для API  
+- уведомления в Telegram до 5 сек
+
+### R/W ratio
+- ~80% чтения, 20% записи
+
+### traffic volume (RW)
+- ~1–2 GB/день
+
+### storage: disk, RAM
+- **Postgres**: ~10 MB / 10k пользователей (данные портфелей)  
+- **История цен**: до 1 GB/месяц  
+- **RAM**: 2–4 GB
+
+---
+
+### latency & throughput
+- FastAPI + Postgres обеспечивают нужные показатели
+
+### CAP
+- **Consistency**: strong (портфель), eventual (цены)  
+- **Availability**: репликация + failover
+
+### performance vs scalability
+- 1 сервер (4 vCPU, 8 GB RAM) для 10k пользователей  
+- при росте: горизонтальное масштабирование + Redis
+
+### costs
+- ~2000 руб/мес. (сервер)
+
+
 **Макет:**
 
 ![CleanShot 2025-09-08 at 18.52.51.png](imgs/CleanShot_2025-09-08_at_18.52.51.png)

@@ -108,3 +108,7 @@ Python + FastAPI, TypeScript, PostgresQl
 
 - alert
 - alert_trigger_log
+
+
+### C4
+![c4.png](imgs/c4.png)

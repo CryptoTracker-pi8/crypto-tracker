@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
+import httpx
 
 from cryptotracker.domains.currencies.schemas import (
     CurrencyDetailResponse,
@@ -21,7 +22,14 @@ async def get_currencies(limit: int = Query(default=50, ge=1, le=250, descriptio
     try:
         currencies = await coin_gecko_service.get_popular_currencies(limit=limit)
         return CurrencyListResponse(currencies=currencies)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"CoinGecko API error: {e.response.status_code} - {e.response.text}"
+        )
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to fetch currencies: {str(e)}")
 
 

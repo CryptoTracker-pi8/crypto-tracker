@@ -46,18 +46,26 @@ class CoinGeckoService:
     async def get_currency_by_symbol(self, symbol: str) -> Optional[CurrencyPrice]:
         """
         Get currency details by symbol.
+        Prioritizes coins by market cap when multiple coins share the same symbol.
         """
         # CoinGecko uses coin IDs, not symbols, so we need to search
         async with httpx.AsyncClient() as client:
-            # First, get coin ID by symbol
+            # First, get list of coins with highest market cap (top 250)
             response = await client.get(
-                f"{self.BASE_URL}/coins/list",
-                params={"include_platform": False},
+                f"{self.BASE_URL}/coins/markets",
+                params={
+                    "vs_currency": "usd",
+                    "order": "market_cap_desc",
+                    "per_page": 250,
+                    "page": 1,
+                    "sparkline": False,
+                },
                 timeout=10.0,
             )
             response.raise_for_status()
             coins = response.json()
             
+            # Find the coin with matching symbol (prioritized by market cap)
             coin_id = None
             for coin in coins:
                 if coin["symbol"].upper() == symbol.upper():

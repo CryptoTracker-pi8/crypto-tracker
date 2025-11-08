@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, F
+from aiogram import Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -60,7 +60,7 @@ async def cmd_status(message: Message):
     """
     # Extract symbol from command arguments
     args = message.text.split()[1:] if message.text else []
-    
+
     if not args:
         await message.answer(
             "❌ Please provide a currency symbol.\n\n"
@@ -68,13 +68,13 @@ async def cmd_status(message: Message):
             "Example: <code>/status ETH</code>"
         )
         return
-    
+
     symbol = args[0].upper()
-    
+
     await message.answer(f"⏳ Fetching {symbol} price...")
-    
+
     currency = await api_client.get_currency(symbol)
-    
+
     if not currency:
         await message.answer(
             f"❌ Currency <b>{symbol}</b> not found.\n\n"
@@ -82,33 +82,33 @@ async def cmd_status(message: Message):
             "Example: <code>/status BTC</code>"
         )
         return
-    
+
     # Format price
-    price = currency.get("price_usd", 0)
-    price_change = currency.get("price_change_24h")
+    price = currency.get("price", 0)
+    price_change = currency.get("price_change_percentage_24h")
     name = currency.get("name", symbol)
-    
+
     price_text = f"${price:,.2f}"
-    
+
     if price_change is not None:
         change_emoji = "📈" if price_change >= 0 else "📉"
         change_sign = "+" if price_change >= 0 else ""
         price_text += f" {change_emoji} {change_sign}{price_change:.2f}%"
-    
+
     response_text = f"""
 <b>{name} ({symbol})</b>
 
 💰 Price: <b>{price_text}</b>
 """
-    
-    if currency.get("market_cap"):
-        market_cap = currency["market_cap"] / 1e9
+
+    if currency.get("market_cap_usd"):
+        market_cap = currency["market_cap_usd"] / 1e9
         response_text += f"📊 Market Cap: ${market_cap:.2f}B\n"
-    
-    if currency.get("volume_24h"):
-        volume = currency["volume_24h"] / 1e9
+
+    if currency.get("total_volume"):
+        volume = currency["total_volume"] / 1e9
         response_text += f"💹 24h Volume: ${volume:.2f}B\n"
-    
+
     await message.answer(response_text)
 
 

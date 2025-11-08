@@ -11,7 +11,7 @@ class CoinGeckoService:
     Service for interacting with CoinGecko API.
     """
     BASE_URL = "https://api.coingecko.com/api/v3"
-    
+
     async def get_popular_currencies(self, limit: int = 50) -> list[CurrencyPrice]:
         """
         Get list of popular cryptocurrencies.
@@ -30,7 +30,7 @@ class CoinGeckoService:
             )
             response.raise_for_status()
             data = response.json()
-            
+
             return [
                 CurrencyPrice(
                     symbol=item["symbol"].upper(),
@@ -42,7 +42,7 @@ class CoinGeckoService:
                 )
                 for item in data
             ]
-    
+
     async def get_currency_by_symbol(self, symbol: str) -> Optional[CurrencyPrice]:
         """
         Get currency details by symbol.
@@ -64,17 +64,17 @@ class CoinGeckoService:
             )
             response.raise_for_status()
             coins = response.json()
-            
+
             # Find the coin with matching symbol (prioritized by market cap)
             coin_id = None
             for coin in coins:
                 if coin["symbol"].upper() == symbol.upper():
                     coin_id = coin["id"]
                     break
-            
+
             if not coin_id:
                 return None
-            
+
             # Get coin details
             response = await client.get(
                 f"{self.BASE_URL}/coins/{coin_id}",
@@ -84,7 +84,7 @@ class CoinGeckoService:
             response.raise_for_status()
             data = response.json()
             market_data = data.get("market_data", {})
-            
+
             return CurrencyPrice(
                 symbol=symbol.upper(),
                 name=data["name"],
@@ -93,7 +93,7 @@ class CoinGeckoService:
                 market_cap=market_data.get("market_cap", {}).get("usd"),
                 volume_24h=market_data.get("total_volume", {}).get("usd"),
             )
-    
+
     async def get_currency_history(self, symbol: str, days: int = 7) -> list[CurrencyHistoryPoint]:
         """
         Get currency price history.
@@ -107,16 +107,16 @@ class CoinGeckoService:
             )
             response.raise_for_status()
             coins = response.json()
-            
+
             coin_id = None
             for coin in coins:
                 if coin["symbol"].upper() == symbol.upper():
                     coin_id = coin["id"]
                     break
-            
+
             if not coin_id:
                 return []
-            
+
             # Get price history
             response = await client.get(
                 f"{self.BASE_URL}/coins/{coin_id}/market_chart",
@@ -125,7 +125,7 @@ class CoinGeckoService:
             )
             response.raise_for_status()
             data = response.json()
-            
+
             prices = data.get("prices", [])
             return [
                 CurrencyHistoryPoint(

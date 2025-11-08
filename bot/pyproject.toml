@@ -1,0 +1,12 @@
+[project]
+name = "bot"
+version = "1.0.0"
+description = "Telegram bot for Crypto Tracker"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.4.0",
+    "httpx>=0.27.0",
+    "pydantic-settings>=2.10.1",
+]
+

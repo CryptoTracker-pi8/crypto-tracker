@@ -7,6 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<div>Hello Crypto Tracker</div>} />
       </Routes>
     </BrowserRouter>
   )

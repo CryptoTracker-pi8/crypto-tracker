@@ -8,8 +8,8 @@ interface CurrencyCardProps {
 }
 
 export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: CurrencyCardProps) {
-  const priceChangeClass = currency.price_change_24h
-    ? currency.price_change_24h >= 0
+  const priceChangeClass = currency.price_change_percentage_24h
+    ? currency.price_change_percentage_24h >= 0
       ? 'positive'
       : 'negative'
     : 'neutral'
@@ -32,28 +32,28 @@ export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: Currenc
         )}
       </div>
       <div className="currency-price">
-        <span className="price">${currency.price_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-        {currency.price_change_24h !== undefined && (
+        <span className="price">${currency.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        {currency.price_change_percentage_24h !== undefined && (
           <span className={`price-change ${priceChangeClass}`}>
-            {currency.price_change_24h >= 0 ? '+' : ''}
-            {currency.price_change_24h.toFixed(2)}%
+            {currency.price_change_percentage_24h >= 0 ? '+' : ''}
+            {currency.price_change_percentage_24h.toFixed(2)}%
           </span>
         )}
       </div>
       <div className="currency-stats">
-        {currency.market_cap && (
+        {currency.market_cap_usd && (
           <div className="stat">
             <span className="stat-label">Market Cap:</span>
             <span className="stat-value">
-              ${(currency.market_cap / 1e9).toFixed(2)}B
+              ${(currency.market_cap_usd / 1e9).toFixed(2)}B
             </span>
           </div>
         )}
-        {currency.volume_24h && (
+        {currency.total_volume && (
           <div className="stat">
             <span className="stat-label">24h Volume:</span>
             <span className="stat-value">
-              ${(currency.volume_24h / 1e9).toFixed(2)}B
+              ${(currency.total_volume / 1e9).toFixed(2)}B
             </span>
           </div>
         )}

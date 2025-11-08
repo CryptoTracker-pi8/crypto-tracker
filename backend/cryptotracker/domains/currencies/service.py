@@ -35,10 +35,10 @@ class CoinGeckoService:
                 CurrencyPrice(
                     symbol=item["symbol"].upper(),
                     name=item["name"],
-                    price=item["current_price"],
-                    price_change_percentage_24h=item.get("price_change_percentage_24h"),
-                    market_cap_usd=item.get("market_cap"),
-                    total_volume=item.get("total_volume"),
+                    price_usd=item.get("current_price", 0) or 0,
+                    price_change_24h=item.get("price_change_percentage_24h"),
+                    market_cap=item.get("market_cap"),
+                    volume_24h=item.get("total_volume"),
                 )
                 for item in data
             ]
@@ -80,10 +80,10 @@ class CoinGeckoService:
             return CurrencyPrice(
                 symbol=symbol.upper(),
                 name=data["name"],
-                price=market_data.get("current_price", {}).get("usd", 0),
-                price_change_percentage_24h=market_data.get("price_change_percentage_24h"),
-                market_cap_usd=market_data.get("market_cap", {}).get("usd"),
-                total_volume=market_data.get("total_volume", {}).get("usd"),
+                price_usd=market_data.get("current_price", {}).get("usd", 0),
+                price_change_24h=market_data.get("price_change_percentage_24h"),
+                market_cap=market_data.get("market_cap", {}).get("usd"),
+                volume_24h=market_data.get("total_volume", {}).get("usd"),
             )
     
     async def get_currency_history(self, symbol: str, days: int = 7) -> list[CurrencyHistoryPoint]:

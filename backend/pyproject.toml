@@ -12,4 +12,5 @@ dependencies = [
     "alembic>=1.13.0",
     "httpx>=0.27.0",
     "greenlet>=3.2.4",
+    "aiocache>=0.12.3",
 ]

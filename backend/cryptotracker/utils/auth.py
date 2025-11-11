@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cryptotracker.database.connection import get_db
 from cryptotracker.database.models import User
-from cryptotracker.domains.favorites.service import FavoritesService
+from cryptotracker.api.services.favorite_service import FavoritesService
 
 
 favorites_service = FavoritesService()

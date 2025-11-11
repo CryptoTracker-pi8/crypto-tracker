@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Query
 import httpx
 
-from backend.cryptotracker.api.schemas.currencies_schemas import (
+from cryptotracker.api.schemas.currencies_schemas import (
     CurrencyDetailResponse,
     CurrencyHistoryResponse,
     CurrencyListResponse,
 )
-from backend.cryptotracker.api.services.coin_gecko_service import CoinGeckoService
+from cryptotracker.api.services.coin_gecko_service import CoinGeckoService
 
 router = APIRouter(prefix="/currencies", tags=["currencies"])
 

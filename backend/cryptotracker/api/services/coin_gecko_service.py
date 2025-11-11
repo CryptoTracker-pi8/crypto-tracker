@@ -4,7 +4,7 @@ from typing import Optional
 from aiocache import Cache
 from aiocache.serializers import PickleSerializer
 
-from backend.cryptotracker.api.schemas.currencies_schemas import CurrencyHistoryPoint, CurrencyPrice
+from cryptotracker.api.schemas.currencies_schemas import CurrencyHistoryPoint, CurrencyPrice
 from cryptotracker.domains.currencies.repository import CoinGeckoRepository
 
 

@@ -1,35 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cryptotracker.database.connection import get_db
 from cryptotracker.database.models import User
-from cryptotracker.domains.favorites.schemas import (
+from cryptotracker.api.schemas.favorites_schemas import (
     FavoriteCreate,
     FavoriteDeleteResponse,
     FavoriteListResponse,
     FavoriteResponse,
 )
-from cryptotracker.domains.favorites.service import FavoritesService
+from cryptotracker.api.services.favorite_service import FavoritesService
+from cryptotracker.utils.auth import get_current_user
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
-# Initialize service
 favorites_service = FavoritesService()
-
-
-async def get_current_user(
-    db: AsyncSession = Depends(get_db),
-    x_telegram_id: int = Header(None, alias="X-Telegram-ID"),
-) -> User:
-    """
-    Get current user from Telegram ID header.
-    For MVP, we'll use Telegram ID for authentication.
-    """
-    if not x_telegram_id:
-        raise HTTPException(status_code=401, detail="X-Telegram-ID header is required")
-    
-    user = await favorites_service.get_or_create_user_by_telegram_id(db, x_telegram_id)
-    return user
 
 
 @router.post("", response_model=FavoriteResponse, status_code=201)

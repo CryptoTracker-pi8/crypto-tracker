@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from cryptotracker.utils.common.hostname import get_hostname
 from cryptotracker.config.default import DefaultSettings
 from cryptotracker.config.utils import get_settings
-from cryptotracker.domains import router_list
+from cryptotracker.api import router_list
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
     """

@@ -22,6 +22,9 @@ export function useTheme() {
 
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
+    
+    // Отправляем пользовательское событие об изменении темы
+    window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme } }))
   }, [theme])
 
   const toggleTheme = () => {

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { CurrencyPrice } from '../types/currency'
 import './CurrencyCard.css'
 
@@ -8,6 +9,8 @@ interface CurrencyCardProps {
 }
 
 export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: CurrencyCardProps) {
+  const navigate = useNavigate()
+
   const priceChangeClass = currency.price_change_percentage_24h
     ? currency.price_change_percentage_24h >= 0
       ? 'positive'
@@ -18,8 +21,19 @@ export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: Currenc
   const safeMarketCap = currency.market_cap_usd ?? 0
   const safeVolume = currency.total_volume ?? 0
 
+  const handleCardClick = () => {
+    navigate(`/currency/${currency.symbol.toLowerCase()}`)
+  }
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onAddToFavorites) {
+      onAddToFavorites(currency.symbol)
+    }
+  }
+
   return (
-    <div className="currency-card">
+    <div className="currency-card" onClick={handleCardClick}>
       <div className="currency-header">
         <div>
           <h3 className="currency-symbol">{currency.symbol}</h3>
@@ -28,7 +42,7 @@ export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: Currenc
         {onAddToFavorites && (
           <button
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
-            onClick={() => onAddToFavorites(currency.symbol)}
+            onClick={handleFavoriteClick}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           >
             {isFavorite ? '★' : '☆'}

@@ -6,6 +6,20 @@
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
   box-shadow: 0 2px 8px var(--card-shadow);
+  user-select: none;
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .currency-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .currency-card {
+    padding: 1rem;
+  }
 }
 
 .currency-card:hover {
@@ -32,6 +46,16 @@
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+@media (max-width: 599px) {
+  .currency-symbol {
+    font-size: 1.25rem;
+  }
+
+  .currency-name {
+    font-size: 0.8rem;
+  }
 }
 
 .favorite-btn {
@@ -72,6 +96,36 @@
   border-radius: 4px;
 }
 
+@media (max-width: 767px) {
+  .currency-price {
+    gap: 0.75rem;
+  }
+
+  .price {
+    font-size: 1.5rem;
+  }
+
+  .price-change {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .currency-price {
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .price {
+    font-size: 1.25rem;
+  }
+
+  .price-change {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
 .price-change.positive {
   color: #4ade80;
   background: rgba(74, 222, 128, 0.1);
@@ -90,6 +144,20 @@
   display: flex;
   gap: 1.5rem;
   font-size: 0.875rem;
+}
+
+@media (max-width: 767px) {
+  .currency-stats {
+    gap: 1rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .currency-stats {
+    gap: 0.875rem;
+    font-size: 0.75rem;
+  }
 }
 
 .stat {

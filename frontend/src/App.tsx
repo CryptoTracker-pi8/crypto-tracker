@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
+import { CurrencyPage } from './pages/CurrencyPage'
 import { useTheme } from './hooks/useTheme'
 import { Moon, Sun } from 'lucide-react'
 import './App.css'
@@ -21,6 +22,7 @@ function App() {
         </nav>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/currency/:symbol" element={<CurrencyPage />} />
         </Routes>
       </div>
     </BrowserRouter>

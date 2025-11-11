@@ -14,6 +14,10 @@ export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: Currenc
       : 'negative'
     : 'neutral'
 
+  const safePrice = currency.price ?? 0
+  const safeMarketCap = currency.market_cap_usd ?? 0
+  const safeVolume = currency.total_volume ?? 0
+
   return (
     <div className="currency-card">
       <div className="currency-header">
@@ -32,28 +36,28 @@ export function CurrencyCard({ currency, onAddToFavorites, isFavorite }: Currenc
         )}
       </div>
       <div className="currency-price">
-        <span className="price">${currency.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-        {currency.price_change_percentage_24h !== undefined && (
+        <span className="price">${safePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        {currency.price_change_percentage_24h !== undefined && currency.price_change_percentage_24h !== null && (
           <span className={`price-change ${priceChangeClass}`}>
             {currency.price_change_percentage_24h >= 0 ? '+' : ''}
-            {currency.price_change_percentage_24h.toFixed(2)}%
+            {(currency.price_change_percentage_24h ?? 0).toFixed(2)}%
           </span>
         )}
       </div>
       <div className="currency-stats">
-        {currency.market_cap_usd && (
+        {safeMarketCap > 0 && (
           <div className="stat">
             <span className="stat-label">Market Cap:</span>
             <span className="stat-value">
-              ${(currency.market_cap_usd / 1e9).toFixed(2)}B
+              ${(safeMarketCap / 1e9).toFixed(2)}B
             </span>
           </div>
         )}
-        {currency.total_volume && (
+        {safeVolume > 0 && (
           <div className="stat">
             <span className="stat-label">24h Volume:</span>
             <span className="stat-value">
-              ${(currency.total_volume / 1e9).toFixed(2)}B
+              ${(safeVolume / 1e9).toFixed(2)}B
             </span>
           </div>
         )}

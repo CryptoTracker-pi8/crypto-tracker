@@ -1,15 +1,17 @@
 .currency-card {
-  background: var(--card-bg, #1a1a1a);
-  border: 1px solid var(--border-color, #333);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  box-shadow: 0 2px 8px var(--card-shadow);
 }
 
 .currency-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--card-shadow);
+  border-color: #4ade80;
 }
 
 .currency-header {
@@ -23,13 +25,13 @@
   margin: 0 0 0.25rem 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--text-primary);
 }
 
 .currency-name {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
 }
 
 .favorite-btn {
@@ -37,7 +39,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--text-secondary, #666);
+  color: var(--text-secondary);
   transition: color 0.2s, transform 0.2s;
   padding: 0.25rem;
 }
@@ -60,7 +62,7 @@
 .price {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary, #fff);
+  color: var(--text-primary);
 }
 
 .price-change {
@@ -81,7 +83,7 @@
 }
 
 .price-change.neutral {
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
 }
 
 .currency-stats {
@@ -97,11 +99,11 @@
 }
 
 .stat-label {
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
 }
 
 .stat-value {
-  color: var(--text-primary, #fff);
+  color: var(--text-primary);
   font-weight: 500;
 }
 

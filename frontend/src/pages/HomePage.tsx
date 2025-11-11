@@ -5,7 +5,7 @@ import type { CurrencyPrice } from '../types/currency'
 import './HomePage.css'
 
 export function HomePage() {
-  const [currencies, setCurrencies] = useState<CurrencyPrice[]>([])
+  const [allCurrencies, setAllCurrencies] = useState<CurrencyPrice[]>([])
   const [filteredCurrencies, setFilteredCurrencies] = useState<CurrencyPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -19,14 +19,14 @@ export function HomePage() {
 
   useEffect(() => {
     filterCurrencies()
-  }, [searchQuery, currencies])
+  }, [searchQuery, allCurrencies])
 
   const loadCurrencies = async () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await currenciesApi.getCurrencies(50)
-      setCurrencies(data)
+      const data = await currenciesApi.getCurrencies(250)
+      setAllCurrencies(data)
     } catch (err) {
       setError('Failed to load currencies. Please try again later.')
       console.error('Error loading currencies:', err)
@@ -36,27 +36,30 @@ export function HomePage() {
   }
 
   const loadFavorites = () => {
-    const stored = localStorage.getItem('favorites')
-    if (stored) {
-      try {
-        const favList = JSON.parse(stored) as string[]
-        setFavorites(new Set(favList))
-      } catch {
-        // Ignore parse errors
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('favorites')
+      if (stored) {
+        try {
+          const favList = JSON.parse(stored) as string[]
+          setFavorites(new Set(favList))
+        } catch {
+          // Ignore parse errors
+        }
       }
     }
   }
 
   const filterCurrencies = () => {
     if (!searchQuery.trim()) {
-      setFilteredCurrencies(currencies)
+      setFilteredCurrencies(allCurrencies)
       return
     }
 
-    const query = searchQuery.toLowerCase()
-    const filtered = currencies.filter(
+    const query = searchQuery.toLowerCase().trim()
+    const filtered = allCurrencies.filter(
       (currency) =>
-        currency.symbol.toLowerCase().includes(query) ||
+        currency.symbol.toLowerCase() === query ||
+        currency.symbol.toLowerCase().startsWith(query) ||
         currency.name.toLowerCase().includes(query)
     )
     setFilteredCurrencies(filtered)
@@ -70,7 +73,9 @@ export function HomePage() {
       newFavorites.add(symbol)
     }
     setFavorites(newFavorites)
-    localStorage.setItem('favorites', JSON.stringify(Array.from(newFavorites)))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('favorites', JSON.stringify(Array.from(newFavorites)))
+    }
   }
 
   if (loading) {
@@ -107,15 +112,18 @@ export function HomePage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
         />
+        <div className="search-stats">
+          Showing {filteredCurrencies.length} of {allCurrencies.length} currencies
+        </div>
       </div>
 
       <div className="currencies-grid">
         {filteredCurrencies.length === 0 ? (
           <div className="no-results">No currencies found</div>
         ) : (
-          filteredCurrencies.map((currency) => (
+          filteredCurrencies.map((currency, index) => (
             <CurrencyCard
-              key={currency.symbol}
+              key={`${currency.symbol}-${index}`}
               currency={currency}
               onAddToFavorites={handleAddToFavorites}
               isFavorite={favorites.has(currency.symbol)}

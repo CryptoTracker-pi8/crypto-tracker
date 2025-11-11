@@ -1,7 +1,14 @@
 .home-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+@media (max-width: 599px) {
+  .home-page {
+    padding: 1rem;
+  }
 }
 
 .page-header {
@@ -12,17 +19,23 @@
 .page-header h1 {
   font-size: 2.5rem;
   margin: 0 0 0.5rem 0;
-  color: var(--text-primary, #fff);
+  color: var(--text-primary);
 }
 
 .subtitle {
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
   font-size: 1.125rem;
   margin: 0;
 }
 
 .search-container {
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .search-input {
@@ -30,22 +43,59 @@
   max-width: 500px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid var(--border-color, #333);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: var(--input-bg, #2a2a2a);
-  color: var(--text-primary, #fff);
+  background: var(--input-bg);
+  color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+@media (max-width: 599px) {
+  .search-input {
+    padding: 0.65rem 0.875rem;
+    font-size: 16px;
+  }
 }
 
 .search-input:focus {
   border-color: #4ade80;
 }
 
+.search-stats {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
 .currencies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+/* На больших экранах 3 колонки */
+@media (min-width: 1000px) {
+  .currencies-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* На меньших экранах 2 колонки */
+@media (min-width: 768px) and (max-width: 999px) {
+  .currencies-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* На маленьких экранах 1 колонка */
+@media (max-width: 767px) {
+  .currencies-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 .loading,
@@ -53,7 +103,7 @@
   text-align: center;
   padding: 2rem;
   font-size: 1.125rem;
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
 }
 
 .error {
@@ -82,7 +132,7 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem;
-  color: var(--text-secondary, #aaa);
+  color: var(--text-secondary);
   font-size: 1.125rem;
 }
 

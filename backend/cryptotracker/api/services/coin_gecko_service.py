@@ -3,7 +3,7 @@ from typing import Optional
 
 import httpx
 
-from cryptotracker.domains.currencies.schemas import CurrencyHistoryPoint, CurrencyPrice
+from backend.cryptotracker.api.schemas.currencies_schemas import CurrencyHistoryPoint, CurrencyPrice
 
 
 class CoinGeckoService:

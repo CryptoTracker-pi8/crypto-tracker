@@ -16,7 +16,7 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 svc = PortfolioService()
 
 
-@router.post("", response_model=PortfolioManipulations) # fine
+@router.post("", response_model=PortfolioManipulations)
 async def create_or_edit_portfolio(
     payload: PortfolioCreateOrEdit,
     db: AsyncSession = Depends(get_db),
@@ -41,7 +41,7 @@ async def create_or_edit_portfolio(
         raise
 
 
-@router.get("", response_model=PortfolioRead) # fine
+@router.get("", response_model=PortfolioRead)
 async def get_portfolio(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)

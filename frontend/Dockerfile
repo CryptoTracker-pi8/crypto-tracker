@@ -12,22 +12,23 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Set build environment variables
+ENV VITE_API_BASE_URL=/api/v1
+
 # Build the application
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Production stage with nginx
+FROM nginx:alpine
 
-WORKDIR /app
-
-# Install a simple HTTP server to serve static files
-RUN npm install -g serve
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built files from builder
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose port
 EXPOSE 3001
 
-# Start the server
-CMD ["serve", "-s", "dist", "-l", "3001"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

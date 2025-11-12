@@ -1,12 +1,12 @@
-from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 from cryptotracker.database.connection import get_db
 from cryptotracker.database.models import User
 from cryptotracker.api.schemas.portfolio_schemas import (
-    PortfolioUpsert, PortfolioRead, InvestmentCreate, InvestmentRead, PortfolioStats
+    PortfolioCreateOrEdit, PortfolioRead, InvestmentCreate, InvestmentRead, PortfolioStats,
+    PortfolioManipulations
 )
 from cryptotracker.api.services.portfolio_service import PortfolioService
 from cryptotracker.utils.auth import get_current_user
@@ -16,35 +16,38 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 svc = PortfolioService()
 
 
-@router.post("", response_model=PortfolioRead, status_code=status.HTTP_201_CREATED)
-async def upsert_portfolio(
+@router.post("", response_model=PortfolioManipulations) # fine
+async def create_or_edit_portfolio(
+    payload: PortfolioCreateOrEdit,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-) -> PortfolioRead:
+    current_user: User = Depends(get_current_user),
+) -> PortfolioManipulations:
     """
-    Создать/обновить портфель пользователя (по имени).
+    Create/edit user portfolio
     """
     try:
-        portfolio = await svc.upsert_portfolio(
-            db=db,
+        p, created = await svc.upsert_portfolio(
+            db,
             user_id=current_user.id,
-            name=f"{current_user.username or 'user'+str(current_user.telegram_id)} portfolio"
+            name=payload.name,
+            create=payload.flag,
+            new_name=payload.new_name,
         )
-        return PortfolioRead.model_validate(portfolio)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upsert portfolio: {str(e)}")
-    # return {"response": "portfolio created/updated, u wanna lose all your money =)?"}
+        if created:
+            return PortfolioManipulations.model_validate({ **p.__dict__, "status": "created"})
+        else:
+            return PortfolioManipulations.model_validate({ **p.__dict__, "status": "edited"})
+    except HTTPException:
+        raise
 
 
-@router.get("", response_model=PortfolioRead)
+@router.get("", response_model=PortfolioRead) # fine
 async def get_portfolio(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> PortfolioRead:
     """
-    Получить текущий портфель пользователя.
+    Get user portfolio
     """
     try:
         portfolio = await svc.get_portfolio(db=db, user_id=current_user.id)
@@ -66,7 +69,7 @@ async def add_investment(
     investment_data: InvestmentCreate = None
 ) -> InvestmentRead:
     """
-    Добавить инвестицию в портфель пользователя (портфель создастся при необходимости).
+    Add investment into user portfolio
     """
     try:
         investment = await svc.add_investment(db=db, user_id=current_user.id, **investment_data.model_dump())
@@ -77,28 +80,25 @@ async def add_investment(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add investment: {str(e)}")
-    # return {"response": "investment added"}
 
 
 @router.get("/stats", response_model=PortfolioStats)
-# @router.get("/stats", response_model=None)
 async def get_stats(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> PortfolioStats:
     """
-    Посчитать P&L портфеля пользователя.
+    Get portfolio stats
     """
     try:
-        stats = await svc.calculate_portfolio_stats(db=db, user_id=current_user.id)
-        return PortfolioStats.model_validate(stats)
+        stats = await svc.get_stats(db=db, user_id=current_user.id)
+        return stats
     except HTTPException as e:
         raise e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get portfolio stats: {str(e)}")
-    # return {"response": "buy btc u fucking animal"}
 
 
 @router.delete("/investments/{inv_id}", response_model=None)
@@ -114,11 +114,10 @@ async def delete_investment(
         success = await svc.delete_investment(db=db, user_id=current_user.id, inv_id=inv_id)
         if not success:
             raise HTTPException(status_code=404, detail="Investment not found")
-        return
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "investment deleted successfully"})
     except HTTPException as e:
         raise e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete investment: {str(e)}")
-    # return {"response": "investment deleted, u lose all your money =) u are so goddamn pathetic"}

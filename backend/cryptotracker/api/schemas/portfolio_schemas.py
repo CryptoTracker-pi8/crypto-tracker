@@ -1,44 +1,35 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 
 
 class InvestmentCreate(BaseModel):
-    """
-    Вход для добавления инвестиции.
-    """
     symbol: str = Field(..., description="e.g. BTC", min_length=1, max_length=20)
-    amount: float = Field(..., gt=0, description="Quantity of asset")
-    buy_price: float = Field(..., ge=0, description="USD price at buy time")
+    amount: Decimal = Field(..., gt=0, description="Quantity of asset")
+    buy_price: Decimal = Field(..., ge=0, description="USD price at buy time")
     bought_at: Optional[datetime] = Field(None, description="Purchase timestamp (optional)")
 
 
 class InvestmentRead(BaseModel):
-    """
-    Выходная модель инвестиции.
-    """
     id: int
     symbol: str
-    amount: float
-    buy_price: float
+    amount: Decimal
+    buy_price: Decimal
     bought_at: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class PortfolioUpsert(BaseModel):
-    """
-    Вход для создания/обновления портфеля.
-    """
+class PortfolioCreateOrEdit(BaseModel):
     name: str = Field(..., description="User-defined portfolio name", min_length=1, max_length=100)
+    flag: bool = Field(False, description="True = create new; False = edit exist")
+    new_name: str | None = Field(None, description="New name for already existing portfolio", min_length=1, max_length=100)
 
 
 class PortfolioRead(BaseModel):
-    """
-    Выходная модель портфеля.
-    """
     id: int
     user_id: int
     name: str
@@ -46,12 +37,18 @@ class PortfolioRead(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class PortfolioManipulations(BaseModel):
+    id: int
+    user_id: int
+    name: str
+    investments: List[InvestmentRead] = Field(default_factory=list)
+    status: str
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 class PortfolioStats(BaseModel):
-    """
-    Ответ статистики портфеля.
-    """
-    total_invested: float = Field(..., description="Σ amount * buy_price")
-    current_value: float = Field(..., description="Current market value")
-    pnl_abs: float = Field(..., description="Absolute P&L")
-    pnl_pct: float = Field(..., description="Relative P&L, %")
+    total_invested: Decimal = Field(..., description="Σ amount * buy_price")
+    current_value: Decimal = Field(..., description="Current market value")
+    pnl_abs: Decimal = Field(..., description="Absolute P&L")
+    pnl_pct: Decimal = Field(..., description="Relative P&L, %")

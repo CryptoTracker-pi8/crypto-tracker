@@ -2,6 +2,9 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from datetime import datetime, timezone
 
+from fastapi import HTTPException, status
+from decimal import Decimal
+
 from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -12,9 +15,6 @@ from cryptotracker.api.services.coin_gecko_service import CoinGeckoService
 
 
 class PortfolioService:
-    """
-    Бизнес-логика портфеля. Stateless: всюду получаем db параметром.
-    """
 
     def __init__(self, prices: CoinGeckoService | None = None) -> None:
         self.prices = prices if prices is not None else CoinGeckoService()
@@ -37,7 +37,9 @@ class PortfolioService:
         return user
 
 
-    async def _get_portfolio_by_user(self, db: AsyncSession, user_id: int) -> Optional[Portfolio]:
+    async def _get_portfolio_by_user(
+        self, db: AsyncSession, user_id: int
+    ) -> Optional[Portfolio]:
         res = await db.execute(
             select(Portfolio)
             .where(Portfolio.user_id == user_id)
@@ -45,18 +47,32 @@ class PortfolioService:
         )
         return res.scalar_one_or_none()
 
-    async def upsert_portfolio(self, db: AsyncSession, *, user_id: int, name: str) -> Portfolio:
-        p = await self._get_portfolio_by_user(db, user_id)
-        if p:
-            p.name = name
+    async def upsert_portfolio(self, db: AsyncSession, *, user_id: int, name: str, create: bool, new_name: str | None = None) -> tuple[Portfolio, bool]:
+
+        # create
+        if create:
+            p = await self._get_portfolio_by_user(db, user_id)
+            if p:
+                raise HTTPException(409, "Portfolio already exists")
+            p = Portfolio(user_id=user_id, name=name)
+            db.add(p)
             await db.commit()
             await db.refresh(p)
-            return p
-        p = Portfolio(user_id=user_id, name=name)
-        db.add(p)
+            return p, True
+
+        # edit
+        p = await self._get_portfolio_by_user(db, user_id)
+        if not p:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+
+        if new_name is None or not new_name.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="new_name is required")
+        if len(new_name) > 100:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="new_name is too long")
+        p.name = new_name.strip()
         await db.commit()
         await db.refresh(p)
-        return p
+        return p, False
 
     async def get_portfolio(self, db: AsyncSession, user_id: int) -> Optional[Portfolio]:
         return await self._get_portfolio_by_user(db, user_id)
@@ -114,11 +130,11 @@ class PortfolioService:
 
         total_invested = sum(i.amount * i.buy_price for i in investments)
 
-        current_value = 0.0
+        current_value = Decimal(0)
         for i in investments:
             try:
                 cp = await self.prices.get_currency_by_symbol(i.symbol)
-                price_usd = cp.price_usd or 0.0
+                price_usd = Decimal(str(cp.price_usd or 0))
             except Exception:
                 price_usd = 0.0
             current_value += i.amount * price_usd

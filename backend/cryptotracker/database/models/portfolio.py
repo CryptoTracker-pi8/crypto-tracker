@@ -14,6 +14,7 @@ class Portfolio(Base):
         back_populates="portfolio",
         cascade="all, delete-orphan",
         passive_deletes=True,
+        lazy="selectin"
     )
 
     __table_args__ = (

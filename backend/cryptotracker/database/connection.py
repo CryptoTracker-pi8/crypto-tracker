@@ -47,9 +47,17 @@ async def init_db() -> None:
     Initialize database - create all tables.
     """
     engine = get_engine()
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
-    await engine.dispose()
+
+
+async def shutdown_db() -> None:
+    """
+    Shutdown database - dispose engine.
+    """
+    global _engine
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
 

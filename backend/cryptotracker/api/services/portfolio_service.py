@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from cryptotracker.database.models import Portfolio, Investment, User
-from cryptotracker.domains.portfolio.schemas import PortfolioStats
-from cryptotracker.domains.currencies.service import CoinGeckoService
+from cryptotracker.api.schemas.portfolio_schemas import PortfolioStats
+from cryptotracker.api.services.coin_gecko_service import CoinGeckoService
 
 
 class PortfolioService:

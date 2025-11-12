@@ -11,7 +11,6 @@ class DefaultSettings(BaseSettings):
     But in this situation, we only have standard settings for local development.
     """
 
-    ENV: str = environ.get("ENV", "local")
     PATH_PREFIX: str = environ.get("PATH_PREFIX", "/api/v1")
 
     POSTGRES_DB: str = environ.get("POSTGRES_DB", "cryptotracker_db")

@@ -70,29 +70,29 @@ export function CurrencyPage() {
   // Определяем тему при загрузке и отслеживаем изменения
   useEffect(() => {
     if (typeof window === 'undefined') return
-    
+
     const updateTheme = () => {
       const stored = localStorage.getItem('theme')
       const theme = stored === 'light' || stored === 'dark' ? stored : 'dark'
       setIsDark(theme === 'dark')
     }
-    
+
     updateTheme()
-    
+
     // Слушаем изменения в localStorage
     const handleStorageChange = () => {
       updateTheme()
     }
-    
+
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Также слушаем пользовательские события (если используется пользовательское событие)
     const handleThemeChange = () => {
       updateTheme()
     }
-    
+
     window.addEventListener('themeChange', handleThemeChange)
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('themeChange', handleThemeChange)
@@ -131,7 +131,7 @@ export function CurrencyPage() {
       const response = await fetch(`/api/v1/currencies/${symbol}/history?days=${days}`)
       if (!response.ok) throw new Error('History not found')
       const data = await response.json()
-      
+
       // Форматируем даты, показывая каждую уникальную дату
       const formattedHistory = data.history.map((point: any) => ({
         timestamp: new Date(point.timestamp).toLocaleDateString('en-US', {

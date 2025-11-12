@@ -1,13 +1,8 @@
-from os import environ
-
 from cryptotracker.config.default import DefaultSettings
 
 
 def get_settings() -> DefaultSettings:
-    env = environ.get("ENV", "local")
-    if env == "local":
-        return DefaultSettings()
-    # ...
-    # space for other settings
-    # ...
+    """
+    Get application settings.
+    """
     return DefaultSettings()

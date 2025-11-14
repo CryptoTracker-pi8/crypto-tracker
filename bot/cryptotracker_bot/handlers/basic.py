@@ -18,6 +18,7 @@ I can help you track cryptocurrency prices and manage your favorites.
 /start - Show this welcome message
 /help - Show help information
 /status &lt;SYMBOL&gt; - Get current price for a cryptocurrency
+/portfolio - Get info about your portfolio and portfolio statistics
 
 <b>Examples:</b>
 /status BTC - Get Bitcoin price
@@ -39,6 +40,7 @@ async def cmd_help(message: Message):
 • <code>/start</code> - Welcome message
 • <code>/help</code> - Show this help
 • <code>/status &lt;SYMBOL&gt;</code> - Get currency price
+• <code>/portfolio</code> - Get info about your portfolio
 
 <b>Usage:</b>
 To check a cryptocurrency price, use:

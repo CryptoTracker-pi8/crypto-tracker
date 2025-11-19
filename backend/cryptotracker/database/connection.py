@@ -30,9 +30,9 @@ def get_session_factory():
     return _async_session
 
 
-async def get_db() -> AsyncSession:
+async def get_session() -> AsyncSession:
     """
-    Dependency for getting database session.
+    Dependency for getting an async database session.
     """
     async_session = get_session_factory()
     async with async_session() as session:
@@ -40,6 +40,10 @@ async def get_db() -> AsyncSession:
             yield session
         finally:
             await session.close()
+
+
+# Backwards compatibility for existing dependencies
+get_db = get_session
 
 
 async def init_db() -> None:

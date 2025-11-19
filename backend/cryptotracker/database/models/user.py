@@ -22,5 +22,20 @@ class User(Base):
     )
 
     # Relationships
-    favorites: Mapped[list["Favorite"]] = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
+    favorites: Mapped[list["Favorite"]] = relationship(
+        "Favorite",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    alerts: Mapped[list["Alert"]] = relationship(
+        "Alert",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    settings: Mapped["UserSettings"] = relationship(
+        "UserSettings",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
 

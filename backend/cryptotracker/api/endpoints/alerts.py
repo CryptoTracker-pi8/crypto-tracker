@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cryptotracker.api.schemas.alerts_schemas import AlertCreate, AlertRead
 from cryptotracker.api.services.alerts_service import AlertsService
 from cryptotracker.database.connection import get_session
-from cryptotracker.utils.common import get_current_user_id
+from cryptotracker.utils.common.auth import get_current_user_id
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 alerts_service = AlertsService()
@@ -19,11 +19,12 @@ async def create_alert(
     """
     Create a new alert for the authenticated user.
     """
-    try:
-        alert = await alerts_service.create_alert(session=session, user_id=user_id, payload=payload)
-        return AlertRead.model_validate(alert)
-    except Exception as exc:  # pragma: no cover - unexpected failures are surfaced
-        raise HTTPException(status_code=500, detail=f"Failed to create alert: {exc}")
+    alert = await alerts_service.create_alert(
+        session=session,
+        user_id=user_id,
+        payload=payload,
+    )
+    return AlertRead.model_validate(alert)
 
 
 @router.get("", response_model=list[AlertRead])
@@ -34,29 +35,29 @@ async def list_alerts(
     """
     List all alerts for the authenticated user.
     """
-    try:
-        alerts = await alerts_service.list_alerts(session=session, user_id=user_id)
-        return [AlertRead.model_validate(alert) for alert in alerts]
-    except Exception as exc:  # pragma: no cover
-        raise HTTPException(status_code=500, detail=f"Failed to fetch alerts: {exc}")
+    alerts = await alerts_service.list_alerts(
+        session=session,
+        user_id=user_id,
+    )
+    return [AlertRead.model_validate(alert) for alert in alerts]
 
 
-@router.delete("/{alert_id}")
+@router.delete("/{alert_id}", status_code=204)
 async def delete_alert(
     alert_id: int,
     user_id: int = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
-) -> dict[str, str]:
+) -> Response:
     """
     Delete a specific alert belonging to the authenticated user.
     """
-    try:
-        deleted = await alerts_service.delete_alert(session=session, user_id=user_id, alert_id=alert_id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail="Alert not found")
-        return {"message": "Alert deleted successfully"}
-    except HTTPException:
-        raise
-    except Exception as exc:  # pragma: no cover
-        raise HTTPException(status_code=500, detail=f"Failed to delete alert: {exc}")
+    deleted = await alerts_service.delete_alert(
+        session=session,
+        user_id=user_id,
+        alert_id=alert_id,
+    )
 
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    return Response(status_code=204)

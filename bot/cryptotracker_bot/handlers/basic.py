@@ -10,20 +10,21 @@ async def cmd_start(message: Message):
     Handle /start command.
     """
     welcome_text = """
-<b>Welcome to Crypto Tracker Bot! 🚀</b>
+<b>Добро пожаловать в Crypto Tracker Bot! 🚀</b>
 
-I can help you track cryptocurrency prices and manage your favorites.
+Я помогу вам отслеживать курсы криптовалют и управлять избранными монетами.
 
-<b>Available commands:</b>
-/start - Show this welcome message
-/help - Show help information
-/status &lt;SYMBOL&gt; - Get current price for a cryptocurrency
+<b>Доступные команды:</b>
+/start — показать это приветственное сообщение
+/help — показать справку
+/status &lt;СИМВОЛ&gt; — узнать текущую цену криптовалюты
+/portfolio — информация о вашем портфеле и его статистике
 
-<b>Examples:</b>
-/status BTC - Get Bitcoin price
-/status ETH - Get Ethereum price
+<b>Примеры:</b>
+/status BTC — узнать цену Bitcoin
+/status ETH — узнать цену Ethereum
 
-Start by checking a currency price with /status BTC
+Начните с проверки цены криптовалюты: <code>/status BTC</code>
 """
     await message.answer(welcome_text)
 
@@ -33,23 +34,24 @@ async def cmd_help(message: Message):
     Handle /help command.
     """
     help_text = """
-<b>Crypto Tracker Bot Help</b>
+<b>Справка по Crypto Tracker Bot</b>
 
-<b>Commands:</b>
-• <code>/start</code> - Welcome message
-• <code>/help</code> - Show this help
-• <code>/status &lt;SYMBOL&gt;</code> - Get currency price
+<b>Команды:</b>
+• <code>/start</code> — приветственное сообщение
+• <code>/help</code> — показать эту справку
+• <code>/status &lt;СИМВОЛ&gt;</code> — узнать цену криптовалюты
+• <code>/portfolio</code> — получить информацию о портфеле
 
-<b>Usage:</b>
-To check a cryptocurrency price, use:
+<b>Использование:</b>
+Чтобы узнать цену криптовалюты, введите:
 <code>/status BTC</code>
 <code>/status ETH</code>
 <code>/status SOL</code>
 
-Replace SYMBOL with the currency symbol you want to check.
+Замените <code>СИМВОЛ</code> на тикер нужной монеты.
 
-<b>Supported currencies:</b>
-All major cryptocurrencies are supported (BTC, ETH, BNB, SOL, etc.)
+<b>Поддерживаемые валюты:</b>
+Все основные криптовалюты — BTC, ETH, BNB, SOL и другие.
 """
     await message.answer(help_text)
 
@@ -63,23 +65,23 @@ async def cmd_status(message: Message):
 
     if not args:
         await message.answer(
-            "❌ Please provide a currency symbol.\n\n"
-            "Usage: <code>/status BTC</code>\n"
-            "Example: <code>/status ETH</code>"
+            "❌ Укажите символ криптовалюты.\n\n"
+            "Пример использования: <code>/status BTC</code>\n"
+            "Пример: <code>/status ETH</code>"
         )
         return
 
     symbol = args[0].upper()
 
-    await message.answer(f"⏳ Fetching {symbol} price...")
+    await message.answer(f"⏳ Подтягиваем {symbol} цену...")
 
     currency = await api_client.get_currency(symbol)
 
     if not currency:
         await message.answer(
-            f"❌ Currency <b>{symbol}</b> not found.\n\n"
-            "Please check the symbol and try again.\n"
-            "Example: <code>/status BTC</code>"
+            f"❌ Валюта <b>{symbol}</b> не найдена.\n\n"
+            "Проверьте правильность символа и попробуйте снова.\n"
+            "Пример: <code>/status BTC</code>"
         )
         return
 
@@ -98,16 +100,16 @@ async def cmd_status(message: Message):
     response_text = f"""
 <b>{name} ({symbol})</b>
 
-💰 Price: <b>{price_text}</b>
+💰 Цена: <b>{price_text}</b>
 """
 
     if currency.get("market_cap_usd"):
         market_cap = currency["market_cap_usd"] / 1e9
-        response_text += f"📊 Market Cap: ${market_cap:.2f}B\n"
+        response_text += f"📊 Рыночная капитализация: ${market_cap:.2f}B\n"
 
     if currency.get("total_volume"):
         volume = currency["total_volume"] / 1e9
-        response_text += f"💹 24h Volume: ${volume:.2f}B\n"
+        response_text += f"💹 24ч Объем: ${volume:.2f}B\n"
 
     await message.answer(response_text)
 

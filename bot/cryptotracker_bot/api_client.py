@@ -115,9 +115,19 @@ class APIClient:
             "direction": direction,
         }
         async with httpx.AsyncClient(timeout=10.0) as client:
-            r = await client.post(f"{self.base_url}/alerts", headers=self._headers, json=payload)
-            r.raise_for_status()
-            return r.json()
+            try:
+                r = await client.post(f"{self.base_url}/alerts", headers=self._headers, json=payload)
+                r.raise_for_status()
+                return r.json()
+            except httpx.HTTPStatusError as e:
+                detail = None
+                try:
+                    data = e.response.json()
+                    if isinstance(data, dict):
+                        detail = data.get("detail")
+                except Exception:
+                    detail = e.response.text
+                raise ValueError(detail or str(e))
 
     async def delete_alert(self, alert_id: int) -> Dict[str, Any]:
         """

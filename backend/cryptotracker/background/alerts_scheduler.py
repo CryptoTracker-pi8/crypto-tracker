@@ -6,6 +6,8 @@ from decimal import Decimal
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+import httpx
 
 from cryptotracker.api.services.alerts_service import AlertsService
 from cryptotracker.api.services.coin_gecko_service import CoinGeckoService
@@ -17,13 +19,23 @@ _scheduler: AsyncIOScheduler | None = None
 _prices_service = CoinGeckoService()
 
 
+async def _send_telegram_alert(token: str, chat_id: int, text: str) -> None:
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        await client.post(url, json={"chat_id": chat_id, "text": text})
+
+
 async def check_alerts_job() -> None:
     """
     Check active alerts and write trigger logs on threshold hits.
     """
     async_session = get_session_factory()
     async with async_session() as db:
-        result = await db.execute(select(Alert).where(Alert.is_active.is_(True)))
+        result = await db.execute(
+            select(Alert)
+            .where(Alert.is_active.is_(True))
+            .options(selectinload(Alert.user))
+        )
         alerts = list(result.scalars().all())
         if not alerts:
             return
@@ -41,6 +53,9 @@ async def check_alerts_job() -> None:
 
         now = datetime.now(timezone.utc)
         changed = False
+
+        settings = get_settings()
+        bot_token = settings.TELEGRAM_BOT_TOKEN
 
         for alert in alerts:
             current_price = prices.get(alert.symbol.upper())
@@ -64,6 +79,14 @@ async def check_alerts_job() -> None:
                         change_percent=change_pct,
                     )
                 )
+                if bot_token and alert.user and alert.user.telegram_id:
+                    direction = alert.direction
+                    direction_label = "up/down" if direction == "both" else direction
+                    message = (
+                        f"Alert #{alert.id}: {alert.symbol} moved {change_pct:.2f}% "
+                        f"({direction_label}), price {current_price}."
+                    )
+                    await _send_telegram_alert(bot_token, alert.user.telegram_id, message)
                 alert.base_price = current_price
                 alert.last_triggered_at = now
                 changed = True

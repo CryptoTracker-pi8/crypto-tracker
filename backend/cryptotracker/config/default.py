@@ -19,6 +19,7 @@ class DefaultSettings(BaseSettings):
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", "5432")[-4:])
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", "hackme")
     ALERT_CHECK_INTERVAL_SECONDS: int = int(environ.get("ALERT_CHECK_INTERVAL_SECONDS", "60"))
+    TELEGRAM_BOT_TOKEN: str | None = environ.get("TELEGRAM_BOT_TOKEN")
 
     @property
     def database_settings(self) -> dict:

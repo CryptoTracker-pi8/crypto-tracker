@@ -97,12 +97,16 @@ class PortfolioService:
                 create=True,
             )
 
+        normalized_bought_at = bought_at
+        if normalized_bought_at and normalized_bought_at.tzinfo is not None:
+            normalized_bought_at = normalized_bought_at.astimezone(timezone.utc).replace(tzinfo=None)
+
         inv = Investment(
             portfolio_id=p.id,
             symbol=symbol.upper(),
             amount=amount,
             buy_price=buy_price,
-            bought_at=bought_at or datetime.now(timezone.utc).replace(tzinfo=None),
+            bought_at=normalized_bought_at or datetime.now(timezone.utc).replace(tzinfo=None),
         )
         db.add(inv)
         await db.commit()

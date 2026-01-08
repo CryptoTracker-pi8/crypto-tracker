@@ -43,6 +43,11 @@ async def get_currency(symbol: str):
         if not currency:
             raise HTTPException(status_code=404, detail=f"Currency {symbol} not found")
         return CurrencyDetailResponse(currency=currency)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"CoinGecko API error: {e.response.status_code} - {e.response.text}"
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -62,8 +67,12 @@ async def get_currency_history(
         if not history:
             raise HTTPException(status_code=404, detail=f"Currency {symbol} not found")
         return CurrencyHistoryResponse(symbol=symbol.upper(), history=history)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"CoinGecko API error: {e.response.status_code} - {e.response.text}"
+        )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch currency history: {str(e)}")
-

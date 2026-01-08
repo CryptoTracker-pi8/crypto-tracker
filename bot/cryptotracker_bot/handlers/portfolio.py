@@ -1,6 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from cryptotracker_bot.api_client import APIClient
+from cryptotracker_bot.keyboards import main_kb
 from aiogram import Dispatcher
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -17,13 +18,20 @@ async def cmd_portfolio_with_args(m: types.Message, api: APIClient):
     try:
         data = await api.get_portfolio()
     except Exception as e:
-        await m.answer(f"Не удалось получить портфель: {e}")
+        await m.answer(f"Не удалось получить портфель: {e}", reply_markup=main_kb())
+        return
+
+    if not data:
+        await m.answer(
+            "Портфель не найден. Создайте его в веб-приложении и попробуйте снова.",
+            reply_markup=main_kb(),
+        )
         return
 
     inv = (data or {}).get("investments") or []
     if not inv:
         name = (data or {}).get("name", "Портфель")
-        await m.answer(f"💼 <b>{name}</b>\nПока нет позиций.")
+        await m.answer(f"💼 <b>{name}</b>\nПока нет позиций.", reply_markup=main_kb())
         return
 
     from datetime import datetime
@@ -50,33 +58,31 @@ async def cmd_portfolio_with_args(m: types.Message, api: APIClient):
 
     name = data.get("name", f"Портфель #{data.get('id')}")
 
+    stats = None
     try:
         s = await api.get_portfolio_stats()
-    except Exception as e:
-        await m.answer(f"Не удалось получить статистику: {e}")
-        return
+        if s:
+            total_invested = Decimal(s.get("total_invested", "0"))
+            current_value = Decimal(s.get("current_value", "0"))
+            pnl_abs = Decimal(s.get("pnl_abs", "0"))
+            pnl_pct = Decimal(s.get("pnl_pct", "0"))
 
-    if not s:
-        await m.answer("Статистика недоступна.")
-        return
+            sign = "🟢" if pnl_abs >= 0 else "🔴"
+            stats = (
+                f"\n📊 <b>Статистика портфеля</b>\n"
+                f"Вложено: <b>{_fmt_money(total_invested)}</b> USD\n"
+                f"Текущая стоимость: <b>{_fmt_money(current_value)}</b> USD\n"
+                f"{sign} PnL: <b>{_fmt_money(pnl_abs)}</b>  (<b>{pnl_pct:+.2f}%</b>)"
+            )
+    except Exception:
+        stats = None
 
-    total_invested = Decimal(s.get("total_invested", "0"))
-    current_value  = Decimal(s.get("current_value", "0"))
-    pnl_abs        = Decimal(s.get("pnl_abs", "0"))
-    pnl_pct        = Decimal(s.get("pnl_pct", "0"))
-
-    sign = "🟢" if pnl_abs >= 0 else "🔴"
-    stats = (
-        f"\n📊 <b>Статистика портфеля</b>\n"
-        f"Вложено: <b>{_fmt_money(total_invested)}</b> USD\n"
-        f"Текущая стоимость: <b>{_fmt_money(current_value)}</b> USD\n"
-        f"{sign} PnL: <b>{_fmt_money(pnl_abs)}</b>  (<b>{pnl_pct:+.2f}%</b>)"
-        )
-
+    footer = stats if stats else "\n📊 Статистика недоступна."
     await m.answer(
-        "💼 <b>{}</b>\n{}\n\nИтого (по ценам покупки): <b>{}</b> USD \n {}".format(
-            name, "\n".join(lines), _fmt_money(total_invested), stats
-        )
+        "💼 <b>{}</b>\n{}\n\nИтого (по ценам покупки): <b>{}</b> USD{}".format(
+            name, "\n".join(lines), _fmt_money(total_invested), footer
+        ),
+        reply_markup=main_kb(),
     )
 
 

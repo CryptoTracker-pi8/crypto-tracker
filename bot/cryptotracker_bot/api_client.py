@@ -39,9 +39,14 @@ class APIClient:
         Get user portfolio by X-Telegram-ID
         """
         async with httpx.AsyncClient(timeout=10.0) as client:
-            r = await client.get(f"{self.base_url}/portfolio", headers=self._headers)
-            r.raise_for_status()
-            return r.json()
+            try:
+                r = await client.get(f"{self.base_url}/portfolio", headers=self._headers)
+                r.raise_for_status()
+                return r.json()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    return None
+                raise
 
     async def get_favorites(self) -> List[Dict[str, Any]]:
         """
@@ -50,6 +55,28 @@ class APIClient:
         async with httpx.AsyncClient(timeout=10.0) as client:
             r = await client.get(f"{self.base_url}/favorites", headers=self._headers)
             r.raise_for_status()
+            data = r.json()
+            if isinstance(data, dict):
+                return data.get("favorites", [])
+            return data
+
+    async def add_favorite(self, symbol: str) -> Dict[str, Any]:
+        """
+        Add currency to favorites.
+        """
+        payload = {"currency_symbol": symbol.upper()}
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.post(f"{self.base_url}/favorites", headers=self._headers, json=payload)
+            r.raise_for_status()
+            return r.json()
+
+    async def delete_favorite(self, symbol: str) -> Dict[str, Any]:
+        """
+        Remove currency from favorites.
+        """
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.delete(f"{self.base_url}/favorites/{symbol.upper()}", headers=self._headers)
+            r.raise_for_status()
             return r.json()
 
     async def get_portfolio_stats(self) -> Dict[str, Any]:
@@ -57,10 +84,77 @@ class APIClient:
         Get user portfolio stats
         """
         async with httpx.AsyncClient(base_url=self.base_url, timeout=10.0) as client:
-            r = await client.get("/portfolio/stats", headers=self._headers)
+            try:
+                r = await client.get("/portfolio/stats", headers=self._headers)
+                r.raise_for_status()
+                return r.json()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    return None
+                raise
+
+    async def list_alerts(self) -> List[Dict[str, Any]]:
+        """
+        Get user alerts.
+        """
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(f"{self.base_url}/alerts", headers=self._headers)
+            r.raise_for_status()
+            data = r.json()
+            if isinstance(data, dict):
+                return data.get("alerts", [])
+            return data
+
+    async def create_alert(self, symbol: str, percent: str, direction: str = "both") -> Dict[str, Any]:
+        """
+        Create new alert.
+        """
+        payload = {
+            "symbol": symbol.upper(),
+            "percent": percent,
+            "direction": direction,
+        }
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.post(f"{self.base_url}/alerts", headers=self._headers, json=payload)
+            r.raise_for_status()
+            return r.json()
+
+    async def delete_alert(self, alert_id: int) -> Dict[str, Any]:
+        """
+        Delete alert by id.
+        """
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.delete(f"{self.base_url}/alerts/{alert_id}", headers=self._headers)
+            r.raise_for_status()
+            return r.json()
+
+    async def get_settings(self) -> Dict[str, Any]:
+        """
+        Get current user settings.
+        """
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(f"{self.base_url}/settings", headers=self._headers)
+            r.raise_for_status()
+            return r.json()
+
+    async def update_settings(
+        self,
+        theme: str | None = None,
+        notification_mode: str | None = None,
+    ) -> Dict[str, Any]:
+        """
+        Update current user settings.
+        """
+        payload: Dict[str, Any] = {}
+        if theme is not None:
+            payload["theme"] = theme
+        if notification_mode is not None:
+            payload["notification_mode"] = notification_mode
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.put(f"{self.base_url}/settings", headers=self._headers, json=payload)
             r.raise_for_status()
             return r.json()
 
 
 api_client = APIClient()
-

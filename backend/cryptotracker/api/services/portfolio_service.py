@@ -90,7 +90,12 @@ class PortfolioService:
     ) -> Investment:
         p = await self._get_portfolio_by_user(db, user_id)
         if not p:
-            p = await self.upsert_portfolio(db, user_id=user_id, name="My Portfolio")
+            p, _ = await self.upsert_portfolio(
+                db,
+                user_id=user_id,
+                name="My Portfolio",
+                create=True,
+            )
 
         inv = Investment(
             portfolio_id=p.id,

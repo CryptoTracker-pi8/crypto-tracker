@@ -4,6 +4,7 @@ from cryptotracker.config.default import DefaultSettings
 from cryptotracker.config.utils import get_settings
 from cryptotracker.api import router_list
 from cryptotracker.database.connection import init_db
+from cryptotracker.background.alerts_scheduler import start_alerts_scheduler, stop_alerts_scheduler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,10 +15,12 @@ async def lifespan(app: FastAPI):
     print("🚀 Initializing database...")
     await init_db()
     print("✅ Database initialized!")
+    start_alerts_scheduler()
 
     yield
 
     # Shutdown
+    stop_alerts_scheduler()
     print("🛑 Shutting down...")
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:

@@ -14,6 +14,7 @@ import {
   Filler,
 } from 'chart.js'
 import type { CurrencyPrice } from '../types/currency'
+import { currenciesApi } from '../api/currencies'
 import './CurrencyPage.css'
 
 // Плагин для кроссхера (пунктирные линии при наведении)
@@ -113,10 +114,8 @@ export function CurrencyPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`/api/v1/currencies/${symbol}`)
-      if (!response.ok) throw new Error('Currency not found')
-      const data = await response.json()
-      setCurrency(data.currency)
+      const currencyDetails = await currenciesApi.getCurrency(symbol)
+      setCurrency(currencyDetails)
     } catch (err) {
       setError('Failed to load currency details')
       console.error(err)
@@ -128,12 +127,10 @@ export function CurrencyPage() {
   const loadHistory = async () => {
     try {
       setChartLoading(true)
-      const response = await fetch(`/api/v1/currencies/${symbol}/history?days=${days}`)
-      if (!response.ok) throw new Error('History not found')
-      const data = await response.json()
+      const historyData = await currenciesApi.getCurrencyHistory(symbol, days)
 
       // Форматируем даты, показывая каждую уникальную дату
-      const formattedHistory = data.history.map((point: any) => ({
+      const formattedHistory = historyData.map((point) => ({
         timestamp: new Date(point.timestamp).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',

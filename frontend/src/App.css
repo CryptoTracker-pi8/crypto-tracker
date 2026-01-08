@@ -12,7 +12,7 @@
 
 .app-nav {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
   background: var(--nav-bg);
@@ -20,6 +20,27 @@
   gap: 1rem;
   width: 100%;
   box-sizing: border-box;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-link:hover {
+  background: var(--button-bg);
+  border-color: var(--border-color);
 }
 
 .theme-toggle {
@@ -56,4 +77,3 @@
 .theme-toggle:hover svg {
   transform: rotate(20deg);
 }
-

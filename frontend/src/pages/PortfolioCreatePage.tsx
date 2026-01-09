@@ -4,7 +4,7 @@ import './PortfolioCreatePage.css'
 
 export function PortfolioCreatePage() {
   const [name, setName] = useState('')
-  const [telegramId, setTelegramId] = useState(() => localStorage.getItem('telegram_id') ?? '')
+  const [telegramId, setTelegramId] = useState(() => localStorage.getItem('telegram_id') ?? '529936774')
   const [loading, setLoading] = useState(false)
   const [loadingPortfolio, setLoadingPortfolio] = useState(false)
   const [error, setError] = useState<string | null>(null)

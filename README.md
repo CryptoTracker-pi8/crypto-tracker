@@ -31,13 +31,13 @@ Python + FastAPI, TypeScript, PostgresQl
 
 ## **Макет:**
 
-![CleanShot 2025-09-08 at 18.52.51.png](imgs/CleanShot_2025-09-08_at_18.52.51.png)
+![CleanShot 2025-09-08 at 18.52.51.png](project_data/imgs/CleanShot_2025-09-08_at_18.52.51.png)
 
-![CleanShot 2025-09-08 at 18.53.40.png](imgs/CleanShot_2025-09-08_at_18.53.40.png)
+![CleanShot 2025-09-08 at 18.53.40.png](project_data/imgs/CleanShot_2025-09-08_at_18.53.40.png)
 
-![CleanShot 2025-09-08 at 18.53.08.png](imgs/CleanShot_2025-09-08_at_18.53.08.png)
+![CleanShot 2025-09-08 at 18.53.08.png](project_data/imgs/CleanShot_2025-09-08_at_18.53.08.png)
 
-![CleanShot 2025-09-08 at 18.53.18.png](imgs/CleanShot_2025-09-08_at_18.53.18.png)
+![CleanShot 2025-09-08 at 18.53.18.png](project_data/imgs/CleanShot_2025-09-08_at_18.53.18.png)
 
 ## Юзер стори
 
@@ -87,7 +87,7 @@ Python + FastAPI, TypeScript, PostgresQl
 
 ## Архитектура и проектировани
 
-![telegram-cloud-photo-size-2-5402271077238964040-y.jpg](imgs/telegram-cloud-photo-size-2-5402271077238964040-y.jpg)
+![telegram-cloud-photo-size-2-5402271077238964040-y.jpg](project_data/imgs/telegram-cloud-photo-size-2-5402271077238964040-y.jpg)
 
 ### Auth / Пользователи
 
@@ -111,4 +111,4 @@ Python + FastAPI, TypeScript, PostgresQl
 
 
 ### C4
-![c4.png](imgs/c4.png)
+![c4.png](project_data/imgs/c4.png)

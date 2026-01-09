@@ -13,6 +13,9 @@ run: ## Run app
 dev: ## Run app with hot reload
 	uv run uvicorn cryptotracker.__main__:app --reload --host 127.0.0.1 --port 8080
 
+test:
+	uv run pytest -q --cov=cryptotracker --cov-report=term-missing
+
 update: ## Update dependencies from pyproject.toml
 	uv sync --upgrade
 

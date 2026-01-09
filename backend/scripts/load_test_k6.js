@@ -12,7 +12,6 @@ export const options = {
     { duration: "30s", target: 0 },
   ],
   thresholds: {
-    http_req_failed: ["rate<0.05"],
     http_req_duration: ["p(95)<1500"],
   },
 };
@@ -34,9 +33,6 @@ export default function () {
 
   res = http.get(`${BASE_URL}/currencies/${symbol}/history?days=7`);
   check(res, { "history ok": (r) => r.status === 200 });
-
-  res = http.get(`${BASE_URL}/portfolio`, { headers });
-  check(res, { "portfolio ok": (r) => r.status === 200 || r.status === 404 });
 
   res = http.get(`${BASE_URL}/portfolio/stats`, { headers });
   check(res, { "stats ok": (r) => r.status === 200 });

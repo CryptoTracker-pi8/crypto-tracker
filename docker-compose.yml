@@ -50,5 +50,18 @@ services:
     networks:
       - default
 
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: crypto-tracker-bot
+    env_file:
+      - ./bot/.env
+    environment:
+      # Use the internal Docker network name for the backend
+      API_BASE_URL: http://backend:8000/api/v1
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:

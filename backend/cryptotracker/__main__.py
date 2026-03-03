@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from cryptotracker.config.default import DefaultSettings
@@ -5,20 +6,27 @@ from cryptotracker.config.utils import get_settings
 from cryptotracker.api import router_list
 from cryptotracker.database.connection import init_db
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Lifespan context manager for app startup and shutdown.
     """
     # Startup
-    print("🚀 Initializing database...")
+    logger.info("Initializing database...")
     await init_db()
-    print("✅ Database initialized!")
+    logger.info("Database initialized.")
 
     yield
 
     # Shutdown
-    print("🛑 Shutting down...")
+    logger.info("Shutting down application.")
 
 def bind_routes(application: FastAPI, setting: DefaultSettings) -> None:
     """

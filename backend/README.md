@@ -38,15 +38,26 @@ backend/
  │   └── main.py
  ├── pyproject.toml
  └── Dockerfile
+```
 
+### Где что находится
 
-##  API Endpoints
+- `cryptotracker/main.py` — создание приложения FastAPI и подключение роутеров
+- `cryptotracker/api/endpoints/` — HTTP endpoints
+- `cryptotracker/api/services/` — сервисы с бизнес-логикой
+- `cryptotracker/api/models/` — модели базы данных
+- `cryptotracker/api/schemas/` — pydantic-схемы
+- `cryptotracker/config/` — конфигурация приложения
 
-###  Health Check
+---
+
+## API Endpoints
+
+### Health Check
 
 GET `/health-check`
 
-Используется для проверки доступности сервиса.
+Проверка доступности backend-сервиса.
 
 Пример ответа:
 
@@ -54,3 +65,86 @@ GET `/health-check`
 {
   "status": "ok"
 }
+```
+
+---
+
+### Криптовалюты
+
+GET `/api/v1/currencies`  
+Возвращает список доступных криптовалют.
+
+GET `/api/v1/currencies/{symbol}`  
+Возвращает данные по конкретной валюте (например: btc, eth).
+
+GET `/api/v1/currencies/{symbol}/history`  
+Возвращает исторические данные по валюте.
+
+---
+
+### Алерты
+
+POST `/api/v1/alerts`  
+Создание пользовательского алерта.
+
+Пример запроса:
+
+```json
+{
+  "symbol": "btc",
+  "target_price": 70000,
+  "direction": "above"
+}
+```
+
+GET `/api/v1/alerts`  
+Получение списка активных алертов.
+
+DELETE `/api/v1/alerts/{id}`  
+Удаление алерта по ID.
+
+---
+
+## Запуск backend
+
+### Локальный запуск
+
+Перейти в папку backend:
+
+```
+cd backend
+```
+
+Установить зависимости:
+
+```
+pip install -e .
+```
+
+Запустить сервер:
+
+```
+uvicorn cryptotracker.main:app --reload
+```
+
+Backend будет доступен по адресу:
+
+```
+http://localhost:8000
+```
+
+---
+
+## Документация API
+
+Swagger UI доступен по адресу:
+
+```
+http://localhost:8000/swagger
+```
+
+OpenAPI схема:
+
+```
+http://localhost:8000/openapi
+```

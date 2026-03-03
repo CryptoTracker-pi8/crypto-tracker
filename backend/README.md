@@ -38,3 +38,19 @@ backend/
  │   └── main.py
  ├── pyproject.toml
  └── Dockerfile
+
+
+##  API Endpoints
+
+###  Health Check
+
+GET `/health-check`
+
+Используется для проверки доступности сервиса.
+
+Пример ответа:
+
+```json
+{
+  "status": "ok"
+}

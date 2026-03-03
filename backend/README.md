@@ -63,7 +63,9 @@ GET `/health-check`
 
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "version": "1.0.0",
+  "database": "connected"
 }
 ```
 
